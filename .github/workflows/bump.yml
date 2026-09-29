@@ -1,0 +1,33 @@
+name: bump
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update formula to the latest solidping release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$(gh release view -R fclairamb/solidping --json tagName -q .tagName)"
+          ver="${tag#v}"
+          current="$(sed -n 's/^  version "\(.*\)"/\1/p' Formula/solidping.rb)"
+          [[ "$ver" != "$current" ]] || { echo "up to date ($ver)"; exit 0; }
+          gh release download "$tag" -R fclairamb/solidping -p solidping-checksums.txt
+          for asset in darwin-arm64 darwin-amd64 linux-arm64 linux-amd64; do
+            sum="$(grep " solidping-$asset.gz\$" solidping-checksums.txt | cut -d' ' -f1)"
+            [[ -n "$sum" ]] || { echo "no checksum for $asset"; exit 1; }
+            # the url line for this asset is followed by its sha256 line
+            sed -i "/solidping-$asset.gz\"/{n;s/sha256 \".*\"/sha256 \"$sum\"/}" Formula/solidping.rb
+          done
+          sed -i "s#/download/v[0-9.]*/#/download/$tag/#; s/^  version \".*\"/  version \"$ver\"/" Formula/solidping.rb
+          rm solidping-checksums.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "solidping $ver"
+          git push
