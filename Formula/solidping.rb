@@ -30,6 +30,15 @@ class Solidping < Formula
     bin.install Dir["solidping-*"].first => "solidping"
   end
 
+  # config.yml and the SQLite database live in the working directory.
+  service do
+    run [opt_bin/"solidping", "serve"]
+    working_dir var/"solidping"
+    keep_alive crashed: true
+    log_path var/"log/solidping.log"
+    error_log_path var/"log/solidping.log"
+  end
+
   test do
     assert_match "SolidPing monitoring service", shell_output("#{bin}/solidping --help")
   end
