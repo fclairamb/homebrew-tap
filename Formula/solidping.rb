@@ -6,8 +6,8 @@ class Solidping < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/fclairamb/solidping/releases/download/v0.49.3/solidping-darwin-arm64.gz"
-      sha256 "4861025373d32a17f81456f7d672ff5ff6ac5233be92c57878b39783deb62822"
+      url "https://github.com/fclairamb/solidping/archive/refs/tags/v0.50.0.tar.gz"
+      sha256 "c60a7e228ab1e3b3bd3a192a801ae1b1cd711d5c0135d1e85313753f5f972123"
     end
     on_intel do
       url "https://github.com/fclairamb/solidping/releases/download/v0.49.3/solidping-darwin-amd64.gz"
